@@ -1,5 +1,3 @@
-from math import log
-NUM_OF_BITS = 128
 MASK8 =  0xff
 MASK32 = 0xffffffff
 MASK64 = 0xffffffffffffffff
@@ -59,15 +57,14 @@ def left_rotate(n, d,bits):
 #00001110
 
 
-def block_encryption(K: int, P: str):
+def encryption(K: int, C: str):
     '''
-    Encrypts a single block
     Inputs:
     K: 128 bits
-    P: Plaintext
+    C: Plaintext
 
     Output:
-    C: Ciphertext of the block
+    P: Plaintext
     '''
     # Key scheduling Part
 
@@ -125,39 +122,39 @@ def block_encryption(K: int, P: str):
     kw3 = left_rotate(KA, 111, bits) >> 64
     kw4 = left_rotate(KA, 111, bits) & MASK64
 
-    D1 = P>>64
-    D2 = P&MASK64
+    D1 = C>>64
+    D2 = C&MASK64
 
-    D1 = D1 ^ kw1          # Prewhitening
-    D2 = D2 ^ kw2
-    D2 = D2 ^ F(D1, k1)    # Round 1
-    D1 = D1 ^ F(D2, k2)    # Round 2
-    D2 = D2 ^ F(D1, k3)    # Round 3
-    D1 = D1 ^ F(D2, k4)    # Round 4
-    D2 = D2 ^ F(D1, k5)    # Round 5
-    D1 = D1 ^ F(D2, k6)    # Round 6
-    D1 = FL   (D1, ke1)    # FL
-    D2 = FLINV(D2, ke2)    # FLINV
-    D2 = D2 ^ F(D1, k7)    # Round 7
-    D1 = D1 ^ F(D2, k8)    # Round 8
-    D2 = D2 ^ F(D1, k9)    # Round 9
-    D1 = D1 ^ F(D2, k10)   # Round 10
-    D2 = D2 ^ F(D1, k11)   # Round 11
-    D1 = D1 ^ F(D2, k12)   # Round 12
-    D1 = FL   (D1, ke3)    # FL
-    D2 = FLINV(D2, ke4)    # FLINV
-    D2 = D2 ^ F(D1, k13)   # Round 13
-    D1 = D1 ^ F(D2, k14)   # Round 14
-    D2 = D2 ^ F(D1, k15)   # Round 15
-    D1 = D1 ^ F(D2, k16)   # Round 16
-    D2 = D2 ^ F(D1, k17)   # Round 17
-    D1 = D1 ^ F(D2, k18)   # Round 18
-    D2 = D2 ^ kw3          # Postwhitening
-    D1 = D1 ^ kw4
+    D1 = D1 ^ kw3          # Prewhitening
+    D2 = D2 ^ kw4
+    D2 = D2 ^ F(D1, k18)    # Round 1
+    D1 = D1 ^ F(D2, k17)    # Round 2
+    D2 = D2 ^ F(D1, k16)    # Round 3
+    D1 = D1 ^ F(D2, k15)    # Round 4
+    D2 = D2 ^ F(D1, k14)    # Round 5
+    D1 = D1 ^ F(D2, k13)    # Round 6
+    D1 = FL   (D1, ke4)    # FL
+    D2 = FLINV(D2, ke3)    # FLINV
+    D2 = D2 ^ F(D1, k12)    # Round 7
+    D1 = D1 ^ F(D2, k11)    # Round 8
+    D2 = D2 ^ F(D1, k10)    # Round 9
+    D1 = D1 ^ F(D2, k9)   # Round 10
+    D2 = D2 ^ F(D1, k8)   # Round 11
+    D1 = D1 ^ F(D2, k7)   # Round 12
+    D1 = FL   (D1, ke2)    # FL
+    D2 = FLINV(D2, ke1)    # FLINV
+    D2 = D2 ^ F(D1, k6)   # Round 13
+    D1 = D1 ^ F(D2, k5)   # Round 14
+    D2 = D2 ^ F(D1, k4)   # Round 15
+    D1 = D1 ^ F(D2, k3)   # Round 16
+    D2 = D2 ^ F(D1, k2)   # Round 17
+    D1 = D1 ^ F(D2, k1)   # Round 18
+    D2 = D2 ^ kw1          # Postwhitening
+    D1 = D1 ^ kw2
 
-    C = (D2 << 64) | D1 #128 bit cipher text
+    P = (D2 << 64) | D1 #128 bit cipher text
 
-    return C
+    return P
 
 
 def F(F_IN: int, KE: int):
@@ -246,47 +243,9 @@ def FLINV(FLINV_IN, KE):
 
     return FLINV_OUT
 
-def encryption(K: int, P: int):
-    '''
-    Encrypts the plaintext
-    Inputs:
-    K: Secret key of 128 bits
-    P: Plaintext
-
-    Output:
-    C: Ciphertext of the block
-    '''
-    
-    #Plaintext is converted to binary string
-    P = bin(P)[2:]
-
-    #Splitting into blocks
-    r = len(P)-1
-    l = max(0, r-127)
-    C_final = ""
-    head_size = int(log(NUM_OF_BITS, 2))
-    while r>=0:
-        P_block = P[l:r+1]
-        C_block = block_encryption(K, int(P_block,2))
-        binary_C_block = bin(C_block)[2:]
-        len_C_block = len(binary_C_block)
-        binary_C_block = (NUM_OF_BITS-len_C_block)*"1" + binary_C_block
-        head = bin(NUM_OF_BITS-len_C_block)[2:]
-        head = (head_size-len(head))*"0" + head
-        
-        C_final = head+binary_C_block+C_final
-        r = l-1
-        l = max(0, r-127)
-        print(head+"  +  "+ binary_C_block)
-    return C_final
-
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
 SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
-# P = 0xf54cfbf8329ef71f9d85adf0f132 #128 bits
-P = 0xfdfffafffffff123123fff123123123fdfa
-C = encryption(K, P)
-print(P,C)
-# format
-#%%
-# bytes()
+C = 207119210555157899890878276050690919807
+P = encryption(K, C)
+print(C,P)
