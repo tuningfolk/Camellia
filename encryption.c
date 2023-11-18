@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<inttypes.h>
+
 const MASK8 =  0xff;
 const MASK32 = 0xffffffff;
 const MASK64 = 0xffffffffffffffff;
@@ -12,7 +13,18 @@ const Sigma4 = 0x54FF53A5F1D36F1C;
 const Sigma5 = 0x10E527FADE682D1D;
 const Sigma6 = 0xB05688C2B3E6C1FD;
 
+
+
+
 int encrypt(int K, char* data){
+    /*
+    Key scheduling
+        The aim of key schedule is to prevent key-based attacks such as:
+        ~related-key attack
+        ~slide attack, rotational attack
+        ~whitening(pre and post)
+    Sigmas are used as "keys" in the F-function
+    */
     int KL = K;
     int KR = 0;
 
@@ -33,7 +45,7 @@ int encrypt(int K, char* data){
     return D1;
 }
 
-int make_F(int F_IN,int KE){
+int F(int F_IN,int KE){
     uint64_t x;
     uint8_t t1,t2,t3,t4,t5,t6,t7,t8;
     uint8_t y1,y2,y3,y4,y5,y6,y7,y8;
