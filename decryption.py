@@ -263,22 +263,36 @@ def decryption(K, C):
     P = ""
     #making sure ciphertext consists of blocks of size 129
     if len(C)%129!=0:
-        print("Invalid Cipher text, Please check again.")
+        print("Cipher text doesn't consist of blocks of size 129. Please check again.")
         exit(1)
     #Splitting into blocks
     r = len(C)-1
-    l = max(0, r-128)
+    l = r-128
     while r>=0:
         C_block = C[l+1:r+1] #starting bit is discarded
-        # print(l+1,r)
         P_block = block_decryption(K,int(C_block, 2))
 
-        #TODO: what next after first block is decrypted 
         P = bin(P_block)[2:] + P
 
         r = l-1
-        l = max(0, r-128)
+        l = r-128
     return int(P,2)
+
+def int_to_text(P_numeric):
+    P_numeric = str(P_numeric) #converted to string
+
+    if len(P_numeric)%3!=1:
+        # print(P_numeric)
+        print("Invalid ciphertext. Please check again")
+        # exit(1)
+    
+    result = ""
+    #starting int "1" is discarded
+    for i in range(1,len(P_numeric)-3,3):
+        # print(int(P_numeric[i:i+3]))
+        result += chr(int(P_numeric[i:i+3]))
+    return result
+
 
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
@@ -286,5 +300,9 @@ SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
 # C = 338078296505202616486730644026417386026372231661954839140944865626623052111876
 # C = 547401577476096363354252883482459131263
 C = int(input("Please enter the ciphertext: "))
-P = decryption(K, C)
-print("The plaintext is: ",P)
+P_numeric = decryption(K, C)
+
+P = int_to_text(P_numeric)
+
+print("The numeric plaintext is:",P_numeric)
+# print("The plaintext is:",P)

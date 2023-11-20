@@ -264,29 +264,36 @@ def encryption(K: int, P: int):
     r = len(P)-1
     l = max(0, r-127)
     C_final = ""
-    head_size = int(log(NUM_OF_BITS, 2))
+    
     while r>=0:
         P_block = P[l:r+1]
         C_block = block_encryption(K, int(P_block,2))
         binary_C_block = bin(C_block)[2:]
         len_C_block = len(binary_C_block)
+
+        if len_C_block>NUM_OF_BITS:
+            print("DANGEROUS!")
+            exit(1)
+       
         binary_C_block = (NUM_OF_BITS-len_C_block)*"0" + binary_C_block
         binary_C_block = "1" + binary_C_block
-        # head = bin(NUM_OF_BITS-len_C_block)[2:]
-        # head = "1"+(head_size-len(head))*"0" + head
         
         C_final = binary_C_block+C_final  #head+binary_C_block+C_final
         r = l-1
         l = max(0, r-127)
-        # print(len_C_block, len(binary_C_block),binary_C_block)
+    
     return int(C_final, 2)
+
+
 def text_to_int(P):
     result = ""
     for c in P:
         s = str(ord(c)) 
         #pad with zero to make the ascii value length equal to 3
         result += (3-len(s))*"0" + s
-    return result
+    #add 1 as the starting integer
+    result = "1"+result
+    return int(result)
 
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
@@ -294,10 +301,12 @@ SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
 # P = 0xf54cfbf8329ef71f9d85adf0f132 #128 bits
 # P = 0xfdfffafffffff123123fff123123123fdfa #140 bits
 
-P = int(input("Please enter the plaintext: "))
-
-C = encryption(K, P)
-print("Encrypted text: ",C)
+P = input("Please enter the plaintext: ")
+# P_numeric = text_to_int(P)
+P_numeric = int(P)
+# print("Numeric equivalent:",P_numeric)
+C = encryption(K, P_numeric)
+print("Encrypted text:",C)
 # format
 #%%
 # bytes()
