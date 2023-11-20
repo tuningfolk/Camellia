@@ -1,3 +1,4 @@
+NUM_OF_BITS=128
 MASK8 =  0xff
 MASK32 = 0xffffffff
 MASK64 = 0xffffffffffffffff
@@ -271,8 +272,11 @@ def decryption(K, C):
     while r>=0:
         C_block = C[l+1:r+1] #starting bit is discarded
         P_block = block_decryption(K,int(C_block, 2))
-
-        P = bin(P_block)[2:] + P
+        binary_P_block = str(bin(P_block)[2:])
+        P_block = "0"*(NUM_OF_BITS-len(binary_P_block)) + binary_P_block
+        P = P_block + P
+        # print(binary_P_block, "---->", C_block)
+        # print("-------------------------------------------")
 
         r = l-1
         l = r-128
@@ -284,11 +288,11 @@ def int_to_text(P_numeric):
     if len(P_numeric)%3!=1:
         # print(P_numeric)
         print("Invalid ciphertext. Please check again")
-        # exit(1)
+        exit(1)
     
     result = ""
     #starting int "1" is discarded
-    for i in range(1,len(P_numeric)-3,3):
+    for i in range(1,len(P_numeric)-2,3):
         # print(int(P_numeric[i:i+3]))
         result += chr(int(P_numeric[i:i+3]))
     return result
@@ -304,5 +308,5 @@ P_numeric = decryption(K, C)
 
 P = int_to_text(P_numeric)
 
-print("The numeric plaintext is:",P_numeric)
-# print("The plaintext is:",P)
+# print("The numeric plaintext is:",P_numeric)
+print("The plaintext is:",P)
