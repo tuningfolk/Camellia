@@ -4,15 +4,15 @@ MASK64 = 0xffffffffffffffff
 MASK128 = 0xffffffffffffffffffffffffffffffff
 
 #64 bit constants
-Sigma1 = 0xA09E667F3BCC908B
-Sigma2 = 0xB67AE8584CAA73B2
-Sigma3 = 0xC6EF372FE94F82BE
-Sigma4 = 0x54FF53A5F1D36F1C
-Sigma5 = 0x10E527FADE682D1D
-Sigma6 = 0xB05688C2B3E6C1FD
-Sigma = [Sigma1, Sigma2, Sigma3, Sigma4, Sigma5, Sigma6]
-for s in Sigma:
-    print(len(bin(s))-2)
+Sigma1 = 0xA09E667F3BCC908B # 64 bits
+Sigma2 = 0xB67AE8584CAA73B2 # 64 bits
+Sigma3 = 0xC6EF372FE94F82BE # 64 bits
+Sigma4 = 0x54FF53A5F1D36F1C # 63 bits
+Sigma5 = 0x10E527FADE682D1D # 61 bits
+Sigma6 = 0xB05688C2B3E6C1FD # 64 bits
+# Sigma = [Sigma1, Sigma2, Sigma3, Sigma4, Sigma5, Sigma6]
+# for s in Sigma:
+#     print(len(bin(s))-2)
 
 #SECRET KEY (128 bits)
 K = 0xf54cfbf8329ef7564b1f9d85adf0f132
@@ -57,7 +57,7 @@ def left_rotate(n, d,bits):
 #00001110
 
 
-def encryption(K: int, C: str):
+def block_decryption(K: int, C: str):
     '''
     Inputs:
     K: 128 bits
@@ -243,9 +243,48 @@ def FLINV(FLINV_IN, KE):
 
     return FLINV_OUT
 
+def decryption(K, C):
+    '''
+    Decrypts each block
+    Each block is of size 129 bits, with the 129th bit 
+    being 1 as the starting bit of the block.
+
+
+    Inputs:
+    K: Any number of bits
+    C: Plaintext
+
+    Output:
+    P: Plaintext
+    '''
+
+    #Ciphertext is converted to binary string
+    C = bin(C)[2:]
+    P = ""
+    #making sure ciphertext consists of blocks of size 129
+    if len(C)%129!=0:
+        print("Invalid Cipher text, Please check again.")
+        exit(1)
+    #Splitting into blocks
+    r = len(C)-1
+    l = max(0, r-128)
+    while r>=0:
+        C_block = C[l+1:r+1] #starting bit is discarded
+        # print(l+1,r)
+        P_block = block_decryption(K,int(C_block, 2))
+
+        #TODO: what next after first block is decrypted 
+        P = bin(P_block)[2:] + P
+
+        r = l-1
+        l = max(0, r-128)
+    return int(P,2)
+
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
 SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
-C = 207119210555157899890878276050690919807
-P = encryption(K, C)
-print(C,P)
+# C = 338078296505202616486730644026417386026372231661954839140944865626623052111876
+# C = 547401577476096363354252883482459131263
+C = int(input("Please enter the ciphertext: "))
+P = decryption(K, C)
+print("The plaintext is: ",P)

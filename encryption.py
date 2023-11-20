@@ -6,15 +6,15 @@ MASK64 = 0xffffffffffffffff
 MASK128 = 0xffffffffffffffffffffffffffffffff
 
 #64 bit constants
-Sigma1 = 0xA09E667F3BCC908B
-Sigma2 = 0xB67AE8584CAA73B2
-Sigma3 = 0xC6EF372FE94F82BE
-Sigma4 = 0x54FF53A5F1D36F1C
-Sigma5 = 0x10E527FADE682D1D
-Sigma6 = 0xB05688C2B3E6C1FD
-Sigma = [Sigma1, Sigma2, Sigma3, Sigma4, Sigma5, Sigma6]
-for s in Sigma:
-    print(len(bin(s))-2)
+Sigma1 = 0xA09E667F3BCC908B # 64 bits
+Sigma2 = 0xB67AE8584CAA73B2 # 64 bits
+Sigma3 = 0xC6EF372FE94F82BE # 64 bits
+Sigma4 = 0x54FF53A5F1D36F1C # 63 bits
+Sigma5 = 0x10E527FADE682D1D # 61 bits
+Sigma6 = 0xB05688C2B3E6C1FD # 64 bits
+# Sigma = [Sigma1, Sigma2, Sigma3, Sigma4, Sigma5, Sigma6]
+# for s in Sigma:
+#     print(len(bin(s))-2)
 
 #SECRET KEY (128 bits)
 K = 0xf54cfbf8329ef7564b1f9d85adf0f132
@@ -270,23 +270,34 @@ def encryption(K: int, P: int):
         C_block = block_encryption(K, int(P_block,2))
         binary_C_block = bin(C_block)[2:]
         len_C_block = len(binary_C_block)
-        binary_C_block = (NUM_OF_BITS-len_C_block)*"1" + binary_C_block
-        head = bin(NUM_OF_BITS-len_C_block)[2:]
-        head = (head_size-len(head))*"0" + head
+        binary_C_block = (NUM_OF_BITS-len_C_block)*"0" + binary_C_block
+        binary_C_block = "1" + binary_C_block
+        # head = bin(NUM_OF_BITS-len_C_block)[2:]
+        # head = "1"+(head_size-len(head))*"0" + head
         
-        C_final = head+binary_C_block+C_final
+        C_final = binary_C_block+C_final  #head+binary_C_block+C_final
         r = l-1
         l = max(0, r-127)
-        print(head+"  +  "+ binary_C_block)
-    return C_final
+        # print(len_C_block, len(binary_C_block),binary_C_block)
+    return int(C_final, 2)
+def text_to_int(P):
+    result = ""
+    for c in P:
+        s = str(ord(c)) 
+        #pad with zero to make the ascii value length equal to 3
+        result += (3-len(s))*"0" + s
+    return result
 
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
 SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
 # P = 0xf54cfbf8329ef71f9d85adf0f132 #128 bits
-P = 0xfdfffafffffff123123fff123123123fdfa
+# P = 0xfdfffafffffff123123fff123123123fdfa #140 bits
+
+P = int(input("Please enter the plaintext: "))
+
 C = encryption(K, P)
-print(P,C)
+print("Encrypted text: ",C)
 # format
 #%%
 # bytes()
