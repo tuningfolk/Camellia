@@ -11,9 +11,7 @@ Sigma3 = 0xC6EF372FE94F82BE # 64 bits
 Sigma4 = 0x54FF53A5F1D36F1C # 63 bits
 Sigma5 = 0x10E527FADE682D1D # 61 bits
 Sigma6 = 0xB05688C2B3E6C1FD # 64 bits
-# Sigma = [Sigma1, Sigma2, Sigma3, Sigma4, Sigma5, Sigma6]
-# for s in Sigma:
-#     print(len(bin(s))-2)
+
 
 #SECRET KEY (128 bits)
 K = 0xf54cfbf8329ef7564b1f9d85adf0f132
@@ -51,12 +49,8 @@ def left_rotate(n, d,bits):
     else:
         print("Unsupported number of bits, create MASK value for "+str(bits)+" bits!")
         exit(1)
-    # print(n<<d, n>>(bits-d))
-    # print(n<<d| n>>(bits-d))
-    # print((n<<d|n>>(bits-d))&mask)
+        
     return ((n<<d)|(n>>(bits-d)))&mask
-#00001110
-
 
 def block_decryption(K: int, C: str):
     '''
@@ -91,10 +85,7 @@ def block_decryption(K: int, C: str):
     D2 = D2 ^ F(D1, Sigma3)
     D1 = D1 ^ F(D2, Sigma4)
     KA = (D1 << 64) | D2
-    # D1 = (KA ^ KR) >> 64
-    # D2 = (KA ^ KR) & MASK64
-    # D2 = D2 ^ F(D1, Sigma5)
-    # D1 = D1 ^ F(D2, Sigma6)
+    
     bits = 128 #size in bits
     kw1 = (left_rotate(KL, 0, bits)) >> 64
     kw2 = left_rotate(KL, 0, bits) & MASK64
@@ -125,7 +116,7 @@ def block_decryption(K: int, C: str):
 
     D1 = C>>64
     D2 = C&MASK64
-
+    
     D1 = D1 ^ kw3          # Prewhitening
     D2 = D2 ^ kw4
     D2 = D2 ^ F(D1, k18)    # Round 1
@@ -180,7 +171,7 @@ def F(F_IN: int, KE: int):
     t1 = SBOX1[t1]
     t2 = SBOX2[t2]
     t3 = SBOX3[t3]
-    # print(t4, bin(t4))
+    
     t4 = SBOX1[left_rotate(t4, 1, 8)] #SBOX4
     
     t5 = SBOX2[t5]
@@ -275,9 +266,7 @@ def decryption(K, C):
         binary_P_block = str(bin(P_block)[2:])
         P_block = "0"*(NUM_OF_BITS-len(binary_P_block)) + binary_P_block
         P = P_block + P
-        # print(binary_P_block, "---->", C_block)
-        # print("-------------------------------------------")
-
+        
         r = l-1
         l = r-128
     return int(P,2)
@@ -286,14 +275,14 @@ def int_to_text(P_numeric):
     P_numeric = str(P_numeric) #converted to string
 
     if len(P_numeric)%3!=1:
-        # print(P_numeric)
+        
         print("Invalid ciphertext. Please check again")
         exit(1)
     
     result = ""
     #starting int "1" is discarded
     for i in range(1,len(P_numeric)-2,3):
-        # print(int(P_numeric[i:i+3]))
+        
         result += chr(int(P_numeric[i:i+3]))
     return result
 
@@ -301,12 +290,9 @@ def int_to_text(P_numeric):
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
 SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
-# C = 338078296505202616486730644026417386026372231661954839140944865626623052111876
-# C = 547401577476096363354252883482459131263
 C = int(input("Please enter the ciphertext: "))
 P_numeric = decryption(K, C)
 
 P = int_to_text(P_numeric)
 
-# print("The numeric plaintext is:",P_numeric)
 print("The plaintext is:",P)

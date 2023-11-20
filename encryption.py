@@ -93,11 +93,8 @@ def block_encryption(K: int, P: str):
     D2 = D2 ^ F(D1, Sigma3)
     D1 = D1 ^ F(D2, Sigma4)
     KA = (D1 << 64) | D2
-    # D1 = (KA ^ KR) >> 64
-    # D2 = (KA ^ KR) & MASK64
-    # D2 = D2 ^ F(D1, Sigma5)
-    # D1 = D1 ^ F(D2, Sigma6)
-    bits = 128 #size in bits
+    
+    bits = NUM_OF_BITS #size in bits
     kw1 = (left_rotate(KL, 0, bits)) >> 64
     kw2 = left_rotate(KL, 0, bits) & MASK64
     k1  = left_rotate(KA, 0, bits) >> 64
@@ -136,6 +133,13 @@ def block_encryption(K: int, P: str):
     D1 = D1 ^ F(D2, k4)    # Round 4
     D2 = D2 ^ F(D1, k5)    # Round 5
     D1 = D1 ^ F(D2, k6)    # Round 6
+
+    
+    # For cryptanalysis
+    # D2 = D2 ^ kw3          # Postwhitening
+    # D1 = D1 ^ kw4 
+    # C = (D2 << 64) | D1 #128 bit cipher text
+    # return C
     D1 = FL   (D1, ke1)    # FL
     D2 = FLINV(D2, ke2)    # FLINV
     D2 = D2 ^ F(D1, k7)    # Round 7
@@ -153,7 +157,7 @@ def block_encryption(K: int, P: str):
     D2 = D2 ^ F(D1, k17)   # Round 17
     D1 = D1 ^ F(D2, k18)   # Round 18
     D2 = D2 ^ kw3          # Postwhitening
-    D1 = D1 ^ kw4
+    D1 = D1 ^ kw4 
 
     C = (D2 << 64) | D1 #128 bit cipher text
 
@@ -210,8 +214,8 @@ def FL(FL_IN: int, KE: int):
     FL_OUT: 64-bit data
     '''
 
-    #x1, x2 as 32-bit unsigned integer
-    #k1, k2 as 32-bit unsigned integer
+    #x1, x2 => 32-bit unsigned integer
+    #k1, k2 => 32-bit unsigned integer
     x1 = FL_IN >> 32
     x2 = FL_IN & MASK32
     k1 = KE >> 32
@@ -270,8 +274,6 @@ def encryption(K: int, P: int):
         
         C_block = block_encryption(K, int(P_block,2))
         binary_C_block = bin(C_block)[2:]
-        # print(P_block, "---->", binary_C_block)
-        # print("-------------------------------------------")
         len_C_block = len(binary_C_block)
 
         if len_C_block>NUM_OF_BITS:
@@ -305,10 +307,7 @@ SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
 
 P = input("Please enter the plaintext: ")
 P_numeric = text_to_int(P)
-# P_numeric = int(P)
-print("Numeric equivalent:",P_numeric)
+
+# print("Numeric equivalent:",P_numeric)
 C = encryption(K, P_numeric)
 print("Encrypted text:",C)
-# format
-#%%
-# bytes()
