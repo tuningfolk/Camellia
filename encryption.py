@@ -1,4 +1,3 @@
-from math import log
 NUM_OF_BITS = 128
 MASK8 =  0xff
 MASK32 = 0xffffffff
@@ -12,12 +11,23 @@ Sigma3 = 0xC6EF372FE94F82BE # 64 bits
 Sigma4 = 0x54FF53A5F1D36F1C # 63 bits
 Sigma5 = 0x10E527FADE682D1D # 61 bits
 Sigma6 = 0xB05688C2B3E6C1FD # 64 bits
-# Sigma = [Sigma1, Sigma2, Sigma3, Sigma4, Sigma5, Sigma6]
-# for s in Sigma:
-#     print(len(bin(s))-2)
 
 #SECRET KEY (128 bits)
-K = 0xf54cfbf8329ef7564b1f9d85adf0f132
+def text_to_int(P):
+    result = ""
+    for c in P:
+        s = str(ord(c)) 
+        #pad with zero to make the ascii value length equal to 3
+        result += (3-len(s))*"0" + s
+    #add 1 as the starting integer
+    result = "1"+result
+    return int(result)
+K = input("Enter key: ")
+K = text_to_int(K)
+while len(bin(K))-2 > NUM_OF_BITS:
+    K = input("Key too long, please enter new key: ")
+    K = text_to_int(K)
+# K = 0xf54cfbf8329ef7564b1f9d85adf0f132
 
 def sbox_to_list():
     str = '''
@@ -52,9 +62,7 @@ def left_rotate(n, d,bits):
     else:
         print("Unsupported number of bits, create MASK value for "+str(bits)+" bits!")
         exit(1)
-    # print(n<<d, n>>(bits-d))
-    # print(n<<d| n>>(bits-d))
-    # print((n<<d|n>>(bits-d))&mask)
+        
     return ((n<<d)|(n>>(bits-d)))&mask
 #00001110
 
@@ -122,6 +130,8 @@ def block_encryption(K: int, P: str):
     kw3 = left_rotate(KA, 111, bits) >> 64
     kw4 = left_rotate(KA, 111, bits) & MASK64
 
+    #Data randomizing part
+
     D1 = P>>64
     D2 = P&MASK64
 
@@ -134,12 +144,13 @@ def block_encryption(K: int, P: str):
     D2 = D2 ^ F(D1, k5)    # Round 5
     D1 = D1 ^ F(D2, k6)    # Round 6
 
-    
+    #--------
     # For cryptanalysis
     # D2 = D2 ^ kw3          # Postwhitening
     # D1 = D1 ^ kw4 
     # C = (D2 << 64) | D1 #128 bit cipher text
     # return C
+    #--------
     D1 = FL   (D1, ke1)    # FL
     D2 = FLINV(D2, ke2)    # FLINV
     D2 = D2 ^ F(D1, k7)    # Round 7
@@ -229,9 +240,9 @@ def FL(FL_IN: int, KE: int):
 def FLINV(FLINV_IN, KE):
     '''
     Inverse of FL-function
+ing four 128-bit long variables KL, KR, KA and KB one should calculate subkeys ki, kwi and kli (all subkeys have 64 bits).
 
-    Inputs:
-        FLINV_IN: 64-bit
+The table for creating subkeys for the secret key of size of 128 bits:
         KE: 64-bit subkey
 
     Outputs:
@@ -277,12 +288,12 @@ def encryption(K: int, P: int):
         len_C_block = len(binary_C_block)
 
         if len_C_block>NUM_OF_BITS:
-            print("DANGEROUS!")
+            # print("DANGEROUS!")
             exit(1)
        
         binary_C_block = (NUM_OF_BITS-len_C_block)*"0" + binary_C_block
         binary_C_block = "1" + binary_C_block
-        
+        print(binary_C_block, end=" ")
         C_final = binary_C_block+C_final
         r = l-1
         l = max(0, r-127)
@@ -302,8 +313,6 @@ def text_to_int(P):
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
 SBOX3 = [left_rotate(num,7,8) for num in SBOX1]
-# P = 0xf54cfbf8329ef71f9d85adf0f132 #128 bits
-# P = 0xfdfffafffffff123123fff123123123fdfa #140 bits
 
 P = input("Please enter the plaintext: ")
 P_numeric = text_to_int(P)

@@ -14,7 +14,21 @@ Sigma6 = 0xB05688C2B3E6C1FD # 64 bits
 
 
 #SECRET KEY (128 bits)
-K = 0xf54cfbf8329ef7564b1f9d85adf0f132
+def text_to_int(P):
+    result = ""
+    for c in P:
+        s = str(ord(c)) 
+        #pad with zero to make the ascii value length equal to 3
+        result += (3-len(s))*"0" + s
+    #add 1 as the starting integer
+    result = "1"+result
+    return int(result)
+K = input("Enter key: ")
+K = text_to_int(K)
+while len(bin(K))-2 > NUM_OF_BITS:
+    K = input("Key too long, please enter new key: ")
+    K = text_to_int(K)
+# K = 0xf54cfbf8329ef7564b1f9d85adf0f132
 
 def sbox_to_list():
     str = '''
@@ -113,6 +127,8 @@ def block_decryption(K: int, C: str):
     k18 = left_rotate(KL, 111, bits) & MASK64
     kw3 = left_rotate(KA, 111, bits) >> 64
     kw4 = left_rotate(KA, 111, bits) & MASK64
+
+    #Data randomizing part
 
     D1 = C>>64
     D2 = C&MASK64
@@ -241,7 +257,6 @@ def decryption(K, C):
     Each block is of size 129 bits, with the 129th bit 
     being 1 as the starting bit of the block.
 
-
     Inputs:
     K: Any number of bits
     C: Plaintext
@@ -286,6 +301,15 @@ def int_to_text(P_numeric):
         result += chr(int(P_numeric[i:i+3]))
     return result
 
+def text_to_int(P):
+    result = ""
+    for c in P:
+        s = str(ord(c)) 
+        #pad with zero to make the ascii value length equal to 3
+        result += (3-len(s))*"0" + s
+    #add 1 as the starting integer
+    result = "1"+result
+    return int(result)
 
 SBOX1 = sbox_to_list()
 SBOX2 = [left_rotate(num,1,8) for num in SBOX1]
