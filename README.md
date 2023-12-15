@@ -9,5 +9,6 @@ The Camellia cipher is a symmetric key block cipher that operates on fixed-size 
 
 ### Known issues:
 The algorithm fails when the key size is greater than 128 bits.  
+  
 Constants are used as they are in the official documentation.
 
