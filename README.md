@@ -8,7 +8,6 @@ The Camellia cipher is a symmetric key block cipher that operates on fixed-size 
 ![Feistel Network](/feistel.png)
 
 ### Known issues:
-The algorithm fails when the key size is greater than 128 bits.  
-  
-Constants are used as they are in the official documentation.
+- The algorithm fails when the key size is greater than 128 bits.  
+- Constants are used as they are in the official documentation.
 
