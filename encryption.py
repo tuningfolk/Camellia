@@ -319,4 +319,5 @@ P_numeric = text_to_int(P)
 
 # print("Numeric equivalent:",P_numeric)
 C = encryption(K, P_numeric)
-print("Encrypted text:",C)
+print("Encrypted text:",str(C)[:12]+"$Aa")
+print("Full encrypted text: ", C)
